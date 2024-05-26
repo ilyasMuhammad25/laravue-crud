@@ -1,12 +1,6 @@
 <script setup>
 
-/*=========================================================================================
-  File Name: show profile
-  
-  ----------------------------------------------------------------------------------------
-  Author: Sky Code Lab
-  Author URL: https://www.skycodelab.io/
-==========================================================================================*/
+
 
 import { useUrlSearchParams } from '@vueuse/core';
 import { usePage } from '@inertiajs/vue3';

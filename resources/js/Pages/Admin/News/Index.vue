@@ -1,15 +1,14 @@
 <script setup>
 
+import NewsFormModal from './Partials/NewsFormModal.vue';
 
-
-import UserFormModal from './Partials/UserFormModal.vue';
 
 const app = computed(() => usePage().props.app);
 const data = computed(() => usePage().props.data);
 const items = computed(() => data.value.items);
 const columns = computed(() => data.value.columns);
 
-const { form, reset, processing, onSort } = useSearchFilter(route('admin.staffs.index'));
+const { form, reset, processing, onSort } = useSearchFilter(route('news.index'));
 
 /* Modal */
 const showModal = ref(false);
@@ -22,6 +21,19 @@ const handleShowModal = (item) => {
 const handleCloseModal = () => {
 	showModal.value = false;
 	selectedItem.value = {};
+};
+
+const handleDelete = async (item) => {
+    if (confirm('Are you sure you want to delete this news item?')) {
+        try {
+            await axios.post(route('news.destroy', item.id));
+            // Remove the deleted item from the items list
+            items.value = items.value.filter(i => i.id !== item.id);
+            alert('News deleted successfully');
+        } catch (error) {
+            alert('An error occurred while deleting the news');
+        }
+    }
 };
 /* End */
 </script>
@@ -47,11 +59,17 @@ const handleCloseModal = () => {
 					</div>
 				</template>
 
-			
+				<template #cell(file_image)="{ item,imagePath }">
+					
+					<img :src="`uploads/news/${item.file_image}`" alt="Image" class="h-10 w-10 object-cover rounded-full">
 
+        </template>
 				<template #cell(actions)="{ item }">
 					<Button intent="text" siz="xs" as="button" @click="handleShowModal(item)">
 						<Icon name="edit" class="h-4" />
+					</Button>
+					<Button intent="text" siz="xs" as="button" @click="() => handleDelete(item)">
+						<Icon name="trash" class="h-4" />
 					</Button>
 				</template>
 
@@ -59,7 +77,7 @@ const handleCloseModal = () => {
 			</DataTable>
 
 			<div v-if="showModal">
-				<UserFormModal :item="selectedItem" :show="showModal" @close="handleCloseModal()" />
+				<NewsFormModal :item="selectedItem" :show="showModal" @close="handleCloseModal()" />
 			</div>
 
 		</SectionCard>
@@ -67,10 +85,17 @@ const handleCloseModal = () => {
 </template>
 
 <script>
+
 import Layout from '@/Layouts/AdminLayout.vue';
 import { defineComponent } from 'vue';
 
 export default defineComponent({
+	props: ['imagePath'], // Define imagePath as a prop
+    data() {
+        return {
+            items: [] // Assuming you have items array
+        };
+    },
 	layout: Layout,
 });
 </script>
